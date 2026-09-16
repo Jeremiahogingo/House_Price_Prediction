@@ -1,43 +1,68 @@
-# House Price Prediction Model
+# 🏠 House Price Prediction Model
+
+A complete machine-learning house price prediction project built from the supplied 2,000-row dataset.
 
 ## 1. Objective
-Predict `Price` from the supplied housing features.
 
-## 2. Dataset
-The supplied file contains **2,000 rows and 10 columns**: `Id`, `Area`, `Bedrooms`, `Bathrooms`, `Floors`, `YearBuilt`, `Location`, `Condition`, `Garage`, and `Price`. The prediction target is `Price`. fileciteturn1file0L11-L20
+Predict `Price` from these house characteristics:
 
-`Id` is excluded from modeling because it is an identifier, not a meaningful house characteristic.
+- `Area` — **house floor area in square feet (sq ft)**
+- `Bedrooms`
+- `Bathrooms`
+- `Floors`
+- `YearBuilt`
+- `Location`
+- `Condition`
+- `Garage`
 
-## 3. Pipeline
-- Load and validate data
-- Split into 80% train / 20% test
-- Impute numeric/categorical values
-- Standardize numeric features
-- One-hot encode categorical features
-- Benchmark Ridge, Random Forest, Gradient Boosting, and a mean baseline
-- Select the lowest-MAE model
-- Retrain the selected pipeline on all labeled data
-- Save `models/house_price_model.joblib`
-- Serve predictions through Streamlit
+`Price` is the target variable. `Id` is excluded because it is only an identifier.
 
-## 4. Validation result
-The holdout test was run with `random_state=42`.
+## 2. Dataset ranges used by the UI
 
-| Model | MAE | RMSE | R² |
-|---|---:|---:|---:|
-| ridge | $243,254 | $279,854 | -0.0067 |
-| random_forest | $251,299 | $290,829 | -0.0872 |
-| gradient_boosting | $243,961 | $281,701 | -0.0200 |
-| mean_baseline | $242,480 | $279,024 | -0.0007 |
+| Feature | Dataset range | Meaning |
+|---|---:|---|
+| Area | 500–5,000 sq ft | House floor area |
+| Bedrooms | 1–5 | Number of bedrooms |
+| Bathrooms | 1–4 | Number of bathrooms |
+| Floors | 1–3 | Number of floors |
+| Year Built | 1900–2023 | Construction year |
+| Location | Downtown / Urban / Suburban / Rural | Location category |
+| Condition | Excellent / Good / Fair / Poor | Current condition |
+| Garage | Yes / No | Garage availability |
+| Price | $50,000–$1,000,000 | Target price in supplied dataset |
 
-### Important finding
-The **mean baseline** achieved the lowest MAE ($242,480). The ML models do not beat this baseline on the supplied data, and R² values are around zero or negative.
+## 3. Training pipeline
 
-This means the dataset, as supplied, contains very little usable relationship between the available house attributes and `Price`. This should be reported honestly rather than presenting a high-looking accuracy number.
+`src/train.py`:
 
-## 5. Run locally
+1. Loads and validates `data/houses.csv`.
+2. Splits the data into 80% training and 20% validation data using `random_state=42`.
+3. Handles numeric and categorical preprocessing.
+4. Trains Ridge, Random Forest, Gradient Boosting, and a mean baseline.
+5. Selects the model with the lowest validation MAE.
+6. Retrains the selected pipeline on all 2,000 records.
+7. Generates `models/house_price_model.joblib`.
+8. Generates `models/metrics.json`.
+9. Writes a complete readable training report to `training_output.txt` every time the script is run.
+
+### Important result from this dataset
+
+The supplied dataset is described as randomly generated. Validation showed that the mean baseline performed slightly better than the tested ML models, so the selected model is currently a baseline predictor rather than a complex ML model. This is documented rather than hidden.
+
+## 4. Streamlit UI
+
+Run:
+
+```powershell
+streamlit run app.py
+```
+
+The interface explains that `Area` means **house floor area in square feet**, shows the dataset's expected ranges, provides input help text, and clearly states that the result is a demonstration rather than a real-world valuation.
+
+## 5. Training and testing
 
 ### Windows PowerShell
+
 ```powershell
 cd house_price_prediction
 python -m venv .venv
@@ -49,29 +74,36 @@ streamlit run app.py
 ```
 
 If PowerShell blocks activation:
+
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
 .\.venv\Scripts\Activate.ps1
 ```
 
-### Example CLI prediction
+### Generated files
+
+After training:
+
+```text
+training_output.txt
+models/house_price_model.joblib
+models/metrics.json
+```
+
+After testing with `pytest -q`:
+
+```text
+test_output.txt
+```
+
+`test_output.txt` is generated automatically by `tests/conftest.py`, so running the normal command `pytest -q` is enough.
+
+## 6. Example CLI prediction
+
 ```powershell
 python src/predict.py --area 2000 --bedrooms 3 --bathrooms 2 --floors 2 --year-built 2000 --location Suburban --condition Good --garage Yes
 ```
 
-## 6. What to improve for a real estate project
-The current features are not enough for a reliable real-world valuation. Add variables such as:
-- city/neighborhood or GPS-derived location
-- land size
-- usable floor area / square footage with consistent units
-- property type
-- distance to CBD, schools, hospitals and transport
-- number of parking spaces
-- amenities
-- furnishing
-- security
-- sale/listing date
-- local market price index
-- comparable nearby transactions
+## 7. Future improvement
 
-The next dataset should also be checked for synthetic/random target generation before model tuning.
+For a real estate valuation system, add real-world features such as neighbourhood/GPS location, land size, property type, distances to amenities, parking capacity, security, furnishing, listing/sale date, and comparable transaction prices.
