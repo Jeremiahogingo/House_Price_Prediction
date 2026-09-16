@@ -2,6 +2,12 @@
 
 A complete machine-learning house price prediction project built from the supplied 2,000-row dataset.
 
+## 📸 Application Screenshot
+
+The Streamlit interface guides the user through the house characteristics, explains how **Area** is measured, provides the expected dataset ranges, and gives a clear warning that the estimate is for demonstration purposes.
+
+![House Price Predictor UI](Docs/Sreenshots/image.png)
+
 ## 1. Objective
 
 Predict `Price` from these house characteristics:
